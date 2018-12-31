@@ -1,5 +1,3 @@
-
-
 var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -21,5 +19,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/group', groupRouter)
 app.use('/users', usersRouter);
+app.use(function(req, res, next) {
+    res.status(404).send("URL not found")
+})
 
 module.exports = app;

@@ -9,17 +9,37 @@ const { fork } = require('child_process');
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length;
 
+//Array of all servers
 let servers = [];
+//The mail worker
 let mailWorker;
 
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
 
-  // Fork servers.
+  // Fork web servers.
+  // All cluster code after this
   for (let i = 0; i < numCPUs; i++) {
     servers.push(cluster.fork());
   }
+  
+  cluster.on('exit', (worker, code, signal) => {
+    console.log(`server ${worker.process.pid} died`);
+    //TODO: Once a web server dies we have to start another
+  });
 
+  cluster.on('message', (worker, msg) => {
+    console.log(`server ${worker.process.pid} sent message ${msg}`);
+    if(msg.cmd == "sendEmail"){
+      mailWorker.send({msg : msg.msg , cmd:'mail'})
+    }
+    worker.send("recieved");
+  })
+
+  //End cluster code
+
+  //Starts the mail worker here
+  //All the mail worker code after this
   mailWorker = fork("./workers/emailWorker", [], (error, stdout, stderr) => {
     if (error) {
       throw error;
@@ -32,19 +52,7 @@ if (cluster.isMaster) {
     mailWorker.send("recieved");
   });
 
-  cluster.on('exit', (worker, code, signal) => {
-    console.log(`server ${worker.process.pid} died`);
-  });
-
-  cluster.on('message', (worker, msg) => {
-    console.log(`server ${worker.process.pid} sent message ${msg}`);
-    if(msg.cmd == "sendEmail"){
-      mailWorker.send({msg : msg.msg , cmd:'mail'})
-    }
-    worker.send("recieved");
-  })
-
-  // console.log(servers)
+  // end mail worker code
 
 }
 else {

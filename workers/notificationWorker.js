@@ -1,0 +1,1 @@
+//This worker will be used to send push notifications to all users
