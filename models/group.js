@@ -3,13 +3,30 @@ var Schema = mongoose.Schema;
 var Session = require("./session")
 
 var groupSchema = new Schema({
-    name: String,
-    _creatorId: Schema.Types.ObjectId,
-    creationdate: Date,
+    name: {
+        type: String,
+        required: true
+    },
+    //The implementation should workd hopefully
+    //Reference this to user once uder model created
+    creator: {
+        type: Schema.Types.ObjectId,
+        required: true
+    },
+    creationDate: {
+        type: Date,
+        required: true
+    },
     //Whether this group can be found publicly
-    isPrivate: Boolean,
+    isPrivate: {
+        type: Boolean,
+        required: true
+    },
     //Whether this group will accept new people or is closed
-    isClosed: Boolean,
+    isClosed:{
+        type: Boolean,
+        required: true
+    },
     sessions: [{ type: Schema.Types.ObjectId, ref: 'Session' }],
     people: [{
         //Add reference parameter when user data is found

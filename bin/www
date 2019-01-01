@@ -16,6 +16,8 @@ let mailWorker;
 
 if (cluster.isMaster) {
   console.log(`Master ${process.pid} is running`);
+  
+  console.log(`Number of CPUS : ${numCPUs}`)
 
   // Fork web servers.
   // All cluster code after this
