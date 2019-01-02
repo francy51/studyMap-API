@@ -11,7 +11,8 @@ var groupSchema = new Schema({
     //Reference this to user once uder model created
     creator: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'User'
     },
     creationDate: {
         type: Date,
@@ -30,7 +31,7 @@ var groupSchema = new Schema({
     sessions: [{ type: Schema.Types.ObjectId, ref: 'Session' }],
     people: [{
         //Add reference parameter when user data is found
-        _personId: { type: Schema.Types.ObjectId }
+        _personId: { type: Schema.Types.ObjectId, ref: 'User' }
     }]
 });
 

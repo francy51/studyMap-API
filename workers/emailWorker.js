@@ -1,7 +1,7 @@
-'use strict';
+
 const nodemailer = require('nodemailer');
 
-
+console.log(process.args);
 
 process.on('message', (msg) => {
     if (msg.cmd == 'registerEmail') {
@@ -46,5 +46,3 @@ process.on('message', (msg) => {
     console.log('Mail worker got message:', msg);
 });
 
-
-console.log("Email worker started");

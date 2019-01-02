@@ -3,7 +3,10 @@ var Schema = mongoose.Schema;
 
 var sessionSchema = Schema({
     subject: String,
-    creatorid: Schema.Types.ObjectId,
+    creator: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
     creationdate: Date,
     startdate: Date,
     location: {
@@ -12,8 +15,9 @@ var sessionSchema = Schema({
     },
     isended: Boolean,
     attendee: [{
-        _attendeeId: Schema.Types.ObjectId,
-        name: String
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+        
     }]
 });
 

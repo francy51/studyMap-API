@@ -42,17 +42,17 @@ if (cluster.isMaster) {
 
   //Starts the mail worker here
   //All the mail worker code after this
-  mailWorker = fork("./workers/emailWorker", [], (error, stdout, stderr) => {
-    if (error) {
-      throw error;
-    }
-    console.log(stdout);
-  });
+  // mailWorker = fork("./workers/emailWorker", (error, stdout, stderr) => {
+  //   if (error) {
+  //     throw error;
+  //   }
+  //   console.log(stdout);
+  // });
 
-  mailWorker.on('message', (msg) => {
-    console.log('Got Message from mail worker', msg);
-    mailWorker.send("recieved");
-  });
+  // mailWorker.on('message', (msg) => {
+  //   console.log('Got Message from mail worker', msg);
+  //   mailWorker.send("recieved");
+  // });
 
   // end mail worker code
 
