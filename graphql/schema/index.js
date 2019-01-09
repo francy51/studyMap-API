@@ -43,7 +43,7 @@ module.exports = buildSchema(`
         type rootQuery {
             groups: [Group!]!
             login(email: String!, password: String!): AuthData!
-            
+            findGroup(id:String!): Group!    
         }
     
         type rootMutation {

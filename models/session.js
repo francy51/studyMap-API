@@ -17,8 +17,9 @@ var sessionSchema = Schema({
     attendee: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
-        
-    }]
+
+    }],
+    maxPeople: Number
 });
 
 module.exports = mongoose.model('Session', sessionSchema);
