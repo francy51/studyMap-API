@@ -22,6 +22,23 @@ module.exports = buildSchema(`
             token: String!
             tokenExpiration: Int!
         }
+        type LocationData {
+            
+            lng: Float!
+            lat: Float!
+            
+        }
+        
+        type Session {
+            subject: String!
+            creator: User!
+            creationdate: String,
+            startdate: String,
+            location: LocationData!
+            isended: Boolean,
+            attendee: [User!]!,
+            maxPeople: Int!
+        }
         
         type User {
             _id: ID!
@@ -40,15 +57,29 @@ module.exports = buildSchema(`
             password: String!
         }
         
+        input SessionInput {
+            subject: String!
+            creator: String!
+            creationdate: String,
+            startdate: String,
+            lng: Float!
+            lat: Float!
+            isended: Boolean,
+            maxPeople: Int!
+        }
+        
         type rootQuery {
             groups: [Group!]!
             login(email: String!, password: String!): AuthData!
-            findGroup(id:String!): Group!    
+            findGroup(id:String!): Group!
+            getGroupSessions(id: String!): [Session!]!
+            getGroupSession(id: String!): Session!
         }
     
         type rootMutation {
             createGroup(groupInput:GroupInput): Group!
             createUser(userInput: UserInput): User
+            createSessions(sessionInput: SessionInput): Session!
         }
         
         schema{

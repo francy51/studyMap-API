@@ -68,5 +68,15 @@ const transformGroup = (group) => {
     }
 }
 
+const transformSession = (session) => {
+    return {
+        ...session._doc,
+        _id: session.id,
+        creator: singleUser.bind(this, session.creator),
+        atendee: users.bind(this, session.atendee),
+        parentGroup: singleGroup.bind(this, session.parentGroup)
+    }
+}
+
 exports.transformGroup = transformGroup;
 exports.transformUser = transformUser;

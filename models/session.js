@@ -19,7 +19,11 @@ var sessionSchema = Schema({
         ref: 'User'
 
     }],
-    maxPeople: Number
+    maxPeople: Number,
+    parentGroup: {
+        type: Schema.Types.ObjectId,
+        ref: "Group"
+    }
 });
 
 module.exports = mongoose.model('Session', sessionSchema);

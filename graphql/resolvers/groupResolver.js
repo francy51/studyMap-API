@@ -37,7 +37,7 @@ module.exports = {
     findGroup: async(args, req) => {
         try {
             let group = await Group.findById(args.id);
-            return group;
+            return transformGroup(group);
         }
         catch (err) {
             throw err;
