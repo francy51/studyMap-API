@@ -66,6 +66,7 @@ module.exports = buildSchema(`
             lat: Float!
             isended: Boolean,
             maxPeople: Int!
+            parentGroup: String!
         }
         
         type rootQuery {

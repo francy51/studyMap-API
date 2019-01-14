@@ -3,7 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "copy": "copyfiles -u 1 src/**/**/* src/**/* src/* public",
+    "build": "npm run copy && workbox injectManifest workbox-config.js",
+    "start": "node ./bin/www",
+    "dev": "npm run build && npm run start"
   },
   "dependencies": {
     "bcrypt": "^3.0.3",
@@ -16,5 +20,9 @@
     "mongoose": "^5.4.1",
     "morgan": "^1.9.1",
     "nodemailer": "^5.0.0"
+  },
+  "devDependencies": {
+    "copyfiles": "^1.2.0",
+    "workbox-cli": "^3.6.3"
   }
 }

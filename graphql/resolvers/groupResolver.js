@@ -17,12 +17,13 @@ module.exports = {
     },
     createGroup: async(args, req) => {
         try {
-            if (!req.isAuh) {
-                throw new Error("Log in")
-            }
+            // if (!req.isAuh) {
+            //     throw new Error("Log in")
+            // }
             let group = new Group({
                 name: args.groupInput.name,
-                creator: req.userId,
+                //Change this to req.userId later
+                creator: args.groupInput.creatorId,
                 creationDate: new Date(),
                 isPrivate: args.groupInput.isPrivate,
                 isClosed: false

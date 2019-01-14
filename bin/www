@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var app = require('../app');
+var app = require('../server');
 var debug = require('debug')('studymap:server');
 var http = require('http');
 // var mail = require("../workers/emailWorker")

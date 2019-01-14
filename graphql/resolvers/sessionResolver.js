@@ -21,12 +21,38 @@ module.exports = {
     getGroupSession: async(args, req) => {
         try {
             //Get session using its id
-            let session = await Session.findById(args.id).populate('Session');
+            let session = await Session.findById(args.id);
             console.log(session)
-            return transformSession(session).sessions;
+            return transformSession(session);
         }
         catch (err) {
             throw err;
         }
     },
+    createSessions: async(args, req) => {
+        try {
+            //Add this back in once I'm no longer testing the api
+            // if (!req.isAuh) {
+            //     throw new Error("Log in")
+            // }
+            let session = new Session({
+                subject: args.sessionInput.subject,
+                creator: args.sessionInput.creator,
+                creationdate: Date(args.sessionInput.creationdate),
+                startdate: Date(args.sessionInput.startdate),
+                location: {
+                    lng: args.sessionInput.lng,
+                    lat: args.sessionInput.lat
+                },
+                isended: false,
+                maxPeople: args.sessionInput.maxPeople,
+                parentGroup: args.sessionInput.parentGroup
+            });
+            let response = await session.save();
+            return transformSession(response);
+        }
+        catch (err) {
+            throw err;
+        }
+    }
 }
