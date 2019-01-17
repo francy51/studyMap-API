@@ -1,8 +1,12 @@
 module.exports = {
   "globDirectory": "public/",
   "globPatterns": [
-    "**/*.{js,html,json}"
+    // "**/*.{js,html,json,css}"
   ],
   "swDest": "public/sw.js",
-  "swSrc": "./src/sw.js"
+  "swSrc": "./src/sw.js",
+    "globIgnores": [
+    "../workbox-config.js",
+    "**/app.js"
+  ]
 };

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.min.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+</head>
+
+<body>
+    <div id="app">
+        <v-app>
+            <v-toolbar>
+                <v-toolbar-title>Study Map API</v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-toolbar-items class="hidden-sm-and-down">
+                    <template v-for="(routes, index) in routes">
+                    <v-btn :key="index" :to="routes.path" flat v-if="routes.visible">{{routes.name}}</v-btn>
+                    </template>
+                </v-toolbar-items>
+                <v-menu class="hidden-md-and-up">
+                    <v-toolbar-side-icon slot="activator"></v-toolbar-side-icon>
+                    <v-list>
+                        <v-list-tile v-for="(routes, index) in routes" :key="index">
+                            <v-list-tile-content>
+                                <v-list-tile-title>{{routes.name}}</v-list-tile-title>
+                            </v-list-tile-content>
+                        </v-list-tile>
+                    </v-list>
+                </v-menu>
+            </v-toolbar>
+            <v-content>
+                <v-container fluid>
+                    <v-layout>
+                        <router-view></router-view>
+                    </v-layout>
+                </v-container>
+            </v-content>
+        </v-app>
+    </div>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify/dist/vuetify.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+    <script type="text/javascript" src="/javascript/app.js"></script>
+
+</body>
+
+</html>

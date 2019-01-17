@@ -19,16 +19,25 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(isAuth)
 
+//Unecesary login turn on only when necesary for debuging
+// app.use(function(req, res, next) {
+//     console.log(req.body)
+//     console.log(req.isAuth);
+//     console.log(req.userId)
+//     next();
+// })
+
+
+//TODO: CHANGE THIS SO THAT ITS PAST IN THROUGNH CONFIG
+mongoose.connect(`mongodb+srv://${mongoConfig.username}:${mongoConfig.password}@testcluster-e8bja.azure.mongodb.net/studyapp?retryWrites=true`, { useNewUrlParser: true }).catch(err => console.error(err))
+
+
 //API using graphql
 app.use('/api', graphql({
     schema: Schema,
     rootValue: Resolvers,
     graphiql: true
-
 }));
-
-//TODO: CHANGE THIS SO THAT ITS PAST IN THROUGNH CONFIG
-mongoose.connect(`mongodb+srv://${mongoConfig.username}:${mongoConfig.password}@testcluster-e8bja.azure.mongodb.net/studyapp?retryWrites=true`, { useNewUrlParser: true }).catch(err => console.error(err))
 
 app.use(function(req, res, next) {
     res.status(404).send("URL not found")

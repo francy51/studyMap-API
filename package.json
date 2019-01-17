@@ -6,8 +6,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "copy": "copyfiles -u 1 src/**/**/* src/**/* src/* public",
     "build": "npm run copy && workbox injectManifest workbox-config.js",
-    "start": "node ./bin/www",
-    "dev": "npm run build && npm run start"
+    "start": "npm run build && node ./bin/www",
+    "dev": "nodemon --ignore public/"
   },
   "dependencies": {
     "bcrypt": "^3.0.3",

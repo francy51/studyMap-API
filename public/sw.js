@@ -3,29 +3,31 @@ importScripts('https://storage.googleapis.com/workbox-cdn/releases/3.5.0/workbox
 if (workbox) {
   console.log(`Yay! Workbox is loaded 🎉`);
 
-  workbox.precaching.precacheAndRoute([
-  {
-    "url": "app.js",
-    "revision": "45c7a6b46be3c5260c3cf247f9f9ea44"
-  },
-  {
-    "url": "index.html",
-    "revision": "fcc2ad67ef3aade9929bf4b42d614e1c"
-  },
-  {
-    "url": "javascript/helpers.js",
-    "revision": "34cc8605bb74327403636f398ffeabd3"
-  },
-  {
-    "url": "javascript/vue.js",
-    "revision": "5424a463b58a5529d7a597974cf371d8"
-  },
-  {
-    "url": "manifest.json",
-    "revision": "26085ed5fd618c1b636e22da74b6f0ed"
-  }
-]);
+  workbox.precaching.precacheAndRoute([]);
 
-} else {
+}
+else {
   console.log(`Boo! Workbox didn't load 😬`);
 }
+
+workbox.routing.registerRoute(
+  new RegExp('/app.js'),
+  workbox.strategies.networkFirst()
+);
+
+// Test this later when I know stuff works
+workbox.routing.registerRoute(
+  new RegExp('/api'),
+  workbox.strategies.networkFirst({
+    // Use a custom cache for this route
+    cacheName: 'api-cache',
+    // Add an array of custom plugins (like workbox.expiration.Plugin)
+    plugins: [
+      new workbox.expiration.Plugin({
+        maxEntries: 60,
+        maxAgeSeconds: 30 * 24 * 60 * 60, // 30 Days
+      }),
+    ]
+  }),
+  'POST'
+);
