@@ -46,7 +46,7 @@ module.exports = {
             throw err;
         }
     },
-    profile: async(args, req) => {
+    myProfile: async(args, req) => {
         try {
             if (!req.isAuth) {
                 throw new Error("Login please");
@@ -55,7 +55,7 @@ module.exports = {
             return user;
         }
         catch (err) {
-
+            throw err;
         }
     }
 }

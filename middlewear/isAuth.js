@@ -2,6 +2,7 @@ var JWT = require('jsonwebtoken')
 
 module.exports = (req, res, next) => {
     let authHeader = req.get('Authorization');
+    console.log(authHeader);
     if (!authHeader) {
         req.isAuth = false;
         return next();
@@ -22,6 +23,7 @@ module.exports = (req, res, next) => {
         }
     }
     req.isAuth = true;
+    console.log(decodedToken)
     req.userId = decodedToken.userId;
     next();
 

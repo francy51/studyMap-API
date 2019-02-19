@@ -32,6 +32,10 @@ var groupSchema = new Schema({
     people: [{
         //Add reference parameter when user data is found
         _personId: { type: Schema.Types.ObjectId, ref: 'User' }
+    }],
+    notes: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Notes'
     }]
 });
 

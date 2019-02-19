@@ -23,6 +23,10 @@ var sessionSchema = Schema({
     parentGroup: {
         type: Schema.Types.ObjectId,
         ref: "Group"
+    },
+    notes: {
+        type: Schema.Types.ObjectId,
+        ref: "Notes"
     }
 });
 

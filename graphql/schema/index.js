@@ -22,11 +22,29 @@ module.exports = buildSchema(`
             token: String!
             tokenExpiration: Int!
         }
+        
         type LocationData {
-            
             lng: Float!
             lat: Float!
-            
+        }
+        
+        type Card {
+            front: String!,
+            back: String!,
+        }
+        
+        type NoteContent {
+            header: String!,
+            body: String!
+        }
+        
+        type Notes {
+            owner: User!
+            notes: [NoteContent!]!,
+            cards: [Card!]!,
+            isPrivate: Boolean,
+            sharedTo: [User]!,
+            collaborators: [User!]!
         }
         
         type Session {
@@ -69,18 +87,41 @@ module.exports = buildSchema(`
             parentGroup: String!
         }
         
+        input NoteContentInput{
+            header: String!,
+            body: String!
+        }
+        
+        input CardInput{
+            front: String!,
+            back: String!
+        }
+        
+        input NotesInput {
+            owner: String!
+            notes: [NoteContentInput!]!,
+            cards: [CardInput!]!,
+            isPrivate: Boolean,
+            sharedTo: [String]!,
+            collaborators: [String!]!
+        }
+        
         type rootQuery {
             groups: [Group!]!
             login(email: String!, password: String!): AuthData!
-            findGroup(id:String!): Group!
+            findNotes(id: String!): Notes!
+            findGroup(id: String!): Group!
+            findSession(groupiD: [String!]!): [Session!]!
             getGroupSessions(id: String!): [Session!]!
             getGroupSession(id: String!): Session!
+            myProfile: User!
         }
     
         type rootMutation {
             createGroup(groupInput:GroupInput): Group!
             createUser(userInput: UserInput): User
             createSessions(sessionInput: SessionInput): Session!
+            createNotes(notesInput: NotesInput): Notes!
         }
         
         schema{

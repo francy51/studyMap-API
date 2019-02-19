@@ -11,7 +11,7 @@ Vue.component('current-card', {
           <v-card>
             <v-card-title primary-title>
               <div>
-                <h3 class="headline mb-0">Current active group</h3>
+                <h3 class="headline mb-0">Your groups</h3>
                 <h5  v-if="group"> {{group.name}} </h5>
                 <h5 v-else> No group currently active </h5>
               </div>
@@ -48,7 +48,11 @@ Vue.component('group-card', {
     </div>`
 })
 
+
+
 // These can be imported from other files
+const FindSessionComponent = { template: `<h1>Find session component</h1>` }
+const FindGroupComponent = { template: `<h1>Find group component</h1>` }
 const LoginComponent = {
     data: function() {
         return {
@@ -89,36 +93,32 @@ const LoginComponent = {
     </v-layout>
   </v-container>`,
     methods: {
-        login: function() {
+        login: async function() {
+
             this.loading = true;
-            // console.log(this.email)
-            // console.log(this.password)
-            // login(email: String!, password: String!): AuthData!
-            axios.post('/api', {
-                    query: `
-                    {
-                      login(email: "${this.email}", password: "${this.password}") {
-                        token
-                      }
-                    }`
-                }, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .then((response) => {
-                    console.log(response);
-                    let tk = response.data.data.login.token;
-                    if (tk != undefined || tk != "") {
-                        console.log(tk)
-                        app.token = tk;
-                        app.turnOnRoutes();
-                        router.replace('/main')
-                    }
-                })
-                .catch((error) => {
-                    console.log(error);
-                });
+
+            try {
+                // console.log(this.email)
+                // console.log(this.password)
+                // login(email: String!, password: String!): AuthData!
+                let data = await sendRequest(`{login(email: "${this.email}", password: "${this.password}") {token}}`);
+
+                console.log(data);
+                let tk = data.login.token;
+                if (tk != undefined || tk != "") {
+                    console.log(tk)
+                    app.token = tk;
+                    app.turnOnRoutes();
+                    router.replace('/main')
+                }
+                else {
+                    this.loading = false;
+                    console.warn("Wrong login");
+                }
+            }
+            catch (err) {
+                console.error(err);
+            }
         }
     }
 }
@@ -137,13 +137,71 @@ const MainComponent = {
     <v-layout justify-space-around column fill-height>
         <template v-for="(group,index) in myGroups">
             <group-card v-bind:group="group"/>
-            <spacer></spacer>
         </template>
     </v-layout>
     </v-layout>
 
 
 </div>`
+}
+const IndividualGroup = { template: `<h1>Individual group component</h1>` }
+const IndividualUser = { template: `<h1>Individual user component</h1>` }
+const NotesMenuComponent = { template: `<h1>Notes menu</h1>` }
+const IndividualNote = { template: `<h1>Individual note</h1>` }
+const UserProfile = {
+    template: `
+    <div>
+        <h1>Profile</h1>
+        <ul v-if="user.local">
+        <li>
+            Username: {{user.local.username}}
+        </li>
+        <li>
+            Email: {{user.local.email}}
+        </li>
+        </ul>
+        <v-switch v-model="allowOfflineUse"  v-on:change="setOfflineUsage">
+            <div slot="label">
+            Offline Usage
+            </div>
+        </v-switch>
+    </div>`,
+    data: function() {
+        return {
+            user: {}
+        }
+    },
+    computed: {
+        allowOfflineUse: () => {
+            return app.allowOfflineUse;
+        }
+    },
+    methods: {
+        setOfflineUsage: () => {
+            app.allowOfflineUse = !app.allowOfflineUse;
+            window.localStorage.setItem('offlineFlag', app.allowOfflineUse);
+            console.log(app.allowOfflineUse)
+            app.$swal('Offline mode set to - ' + app.allowOfflineUse);
+        },
+        getUserData: async function() {
+            let profile = window.localStorage.getItem('profile');
+            console.log(profile)
+            if (!profile) {
+                let data = await sendRequest(`{myProfile{local{username,email}}}`)
+                console.log(data);
+                this.user = data.myProfile
+                console.log(this.user);
+            }
+            else {
+                this.user = profile;
+            }
+
+        }
+    },
+    created: function() {
+        this.getUserData();
+    }
+
 }
 
 // 2. Define some routes
@@ -152,9 +210,15 @@ const MainComponent = {
 // `Vue.extend()`, or just a component options object.
 // We'll talk about nested routes later.
 const routes = [
-    { name: 'home', path: '/main', component: MainComponent, visible: false },
+    { name: 'home', path: '/main', component: MainComponent, visible: false, offline: true },
     { name: 'login', path: '/login', component: LoginComponent, visible: true },
-
+    { name: 'group', path: '/group/:id', component: IndividualGroup, visible: false, fixed: true },
+    { name: 'user', path: '/user/:id', component: IndividualUser, visible: false, fixed: true },
+    { name: 'notes', path: '/notes', component: NotesMenuComponent, visible: false, offline: true },
+    { name: 'note', path: '/notes/:id', component: IndividualNote, visible: false, fixed: true },
+    { name: 'find Group', path: '/findGroup', component: FindGroupComponent, visible: false },
+    { name: 'find Session', path: '/session', component: FindSessionComponent, visible: false },
+    { name: 'profile', path: '/profile', component: UserProfile, visible: false, offline: true }
 ]
 
 // 3. Create the router instance and pass the `routes` option
@@ -174,19 +238,51 @@ const app = new Vue({
         token: "",
         routes: routes,
         groups: [],
-        myGroups: []
+        myGroups: [],
+        allowOfflineUse: false,
+        isOffline: false
     },
     methods: {
         turnOnRoutes: function() {
             for (var i in routes) {
-                if (routes[i].name !== "login")
+                if (routes[i].name !== "login" && routes[i].fixed !== true)
                     routes[i].visible = true;
                 else
                     routes[i].visible = false;
             }
+        },
+        turnOffRoutes: function() {
+            for (var i in routes) {
+                if (routes[i].name !== "login")
+                    routes[i].visible = false;
+                else
+                    routes[i].visible = true;
+            }
+        },
+        offlineMode: function() {
+            for (var i in routes) {
+                if (routes[i].name !== "login" && routes[i].fixed !== true && routes[i].offline == true)
+                    routes[i].visible = true;
+                else
+                    routes[i].visible = false;
+            }
+
+            router.replace('/main')
+        },
+        notifyOffline: function() {
+            if (this.allowOfflineUse)
+                this.$swal('You offline! Your may continue working in offline mode.')
+            else
+                this.$swal('You offline! You are unable to work change this in your profile.')
+        },
+        notifyBackOnline: function() {
+            this.$swal("You are back online!")
         }
+
     },
+
     created: function() {
+        this.allowOfflineUse = window.localStorage.getItem('offlineFlag');
         if (this.token == "" || this.token == undefined) {
             router.replace('/login')
         }
@@ -194,28 +290,6 @@ const app = new Vue({
             this.turnOnRoutes();
         }
 
-        //Remove this later
-        axios.post('/api', {
-                query: `
-                   {
-                    	groups{
-                        name
-                        
-                      }
-                    }`
-            }, {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
-            .then((response) => {
-                console.log(response);
-                let groups = response.data.data.groups;
-                this.myGroups = groups
-            })
-            .catch((error) => {
-                console.log(error);
-            });
 
     }
 }).$mount('#app')
@@ -241,3 +315,78 @@ router.beforeEach((to, from, next) => {
         next()
     }
 })
+
+//Event listener that triggers the offline notification
+window.addEventListener('offline', function(e) {
+    app.allowOfflineUse = window.localStorage.getItem('offlineFlag');
+    if (app.allowOfflineUse == null) app.allowOfflineUse = false;
+    if (app.allowOfflineUse) {
+        if (app.token === "") {
+            app.token = "offline"
+        }
+        app.isOffline = true;
+        app.offlineMode();
+    }
+    app.notifyOffline();
+    console.log('offline');
+});
+
+//Event listener that triggers the online notification
+window.addEventListener('online', function(e) {
+    app.isOffline = false;
+    if (app.token == "offline") {
+        app.token = "";
+        router.replace('/login')
+        app.turnOffRoutes();
+    }
+    else {
+        app.turnOnRoutes();
+    }
+    app.notifyBackOnline();
+    console.log('online');
+});
+
+
+const sendRequest = async(query) => {
+    try {
+        if (app.isOffline) {
+            console.warn("Currently offline so will not send any changes");
+            return;
+        }
+        if (app.token == "" && app.$route.path != '/login') {
+            console.warn("Not logged in")
+            return;
+        }
+        //Remove this later
+        let response = await axios.post('/api', { query }, {
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'StudyMaps ' + app.token
+            }
+        });
+
+        console.log(response);
+        let data = response.data.data;
+        if (app.allowOfflineUse == true) {
+            SaveDataOffline(data);
+        }
+
+        return data;
+
+    }
+    catch (err) {
+        console.log(err);
+    }
+}
+
+const SaveDataOffline = async function(data) {
+
+    if (!app.allowOfflineUse)
+        return;
+
+    console.log(data)
+
+    window.localStorage.setItem('profile', data);
+
+    console.warn("not implemented properly");
+}
