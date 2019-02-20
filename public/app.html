@@ -10,6 +10,7 @@
 <body>
     <div id="app">
         <v-app>
+ 
             <v-toolbar>
                 <v-toolbar-title>Study Map API</v-toolbar-title>
                 <v-spacer></v-spacer>
@@ -29,11 +30,26 @@
                     </v-list>
                 </v-menu>
             </v-toolbar>
+            <div>
+                <v-alert
+                  v-model="success"
+                  dismissible
+                  type="success"
+                >
+                  This is a success alert.
+                </v-alert>
+            
+                <v-alert
+                  v-model="error"
+                  dismissible
+                  type="error"
+                >
+                  This is a error alert.
+                </v-alert>
+            </div>
             <v-content>
                 <v-container fluid>
-                    <v-layout>
-                        <router-view></router-view>
-                    </v-layout>
+                    <router-view></router-view>
                 </v-container>
             </v-content>
         </v-app>

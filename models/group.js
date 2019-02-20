@@ -7,6 +7,10 @@ var groupSchema = new Schema({
         type: String,
         required: true
     },
+    description: {
+        type: String,
+        required: true
+    },
     //The implementation should workd hopefully
     //Reference this to user once uder model created
     creator: {
@@ -24,7 +28,7 @@ var groupSchema = new Schema({
         required: true
     },
     //Whether this group will accept new people or is closed
-    isClosed:{
+    isClosed: {
         type: Boolean,
         required: true
     },

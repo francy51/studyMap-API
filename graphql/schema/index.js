@@ -5,6 +5,7 @@ module.exports = buildSchema(`
         type Group {
             _id: ID!
             name: String!
+            description: String!
             creator: User!
             creationDate: String!
             isPrivate: Boolean!
@@ -107,7 +108,7 @@ module.exports = buildSchema(`
         }
         
         type rootQuery {
-            groups: [Group!]!
+            groups(page: Int!): [Group!]!
             login(email: String!, password: String!): AuthData!
             findNotes(id: String!): Notes!
             findGroup(id: String!): Group!

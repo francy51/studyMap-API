@@ -13,11 +13,20 @@ Vue.component('current-card', {
               <div>
                 <h3 class="headline mb-0">Your groups</h3>
                 <h5  v-if="group"> {{group.name}} </h5>
-                <h5 v-else> No group currently active </h5>
+                <div v-else>
+                <h5> No group currently active </h5>
+
+                </div>
               </div>
             </v-card-title>
             <v-card-actions>
-              <v-btn flat color="orange">Chat</v-btn>
+            
+                <router-link to="/createGroup">
+                   <v-btn flat color="orange">
+                        Create a group
+                    </v-btn>
+                </router-link>
+          
               <v-btn flat color="orange">Explore</v-btn>
             </v-card-actions>
           </v-card>
@@ -27,32 +36,81 @@ Vue.component('current-card', {
 `
 })
 
-
 Vue.component('group-card', {
     props: ['group'],
     template: `
-    <div>
-    <v-flex xs7 offset-xs5 offset-md2 offset-lg5>
-        <v-card max-width=1000 min-width=200 width=600>
-            <v-card-title>
+          <v-card flat tile>
+            <v-img
+              src="https://cdn.vuetifyjs.com/images/cards/desert.jpg"
+              aspect-ratio="2.75"
+            ></v-img>
+    
+            <v-card-title primary-title>
               <div>
                 <h3 class="headline mb-0">{{group.name}}</h3>
+                <div>{{group.description}}</div>
               </div>
             </v-card-title>
+
+            <v-divider light></v-divider>
+    
             <v-card-actions>
-              <v-btn flat color="orange">More details</v-btn>
-              <v-btn flat color="orange">Chat</v-btn>
+              <v-btn flat color="orange">Find out more</v-btn>
             </v-card-actions>
           </v-card>
-         </v-flex>
-    </div>`
+
+    `
 })
 
 
 
 // These can be imported from other files
 const FindSessionComponent = { template: `<h1>Find session component</h1>` }
-const FindGroupComponent = { template: `<h1>Find group component</h1>` }
+const FindGroupComponent = {
+    template: `
+    <div>
+        <h1>Find a group</h1>
+        <v-layout>
+    <v-flex xs12 sm6 offset-sm3>
+        <v-container  v-bind="md" fluid>
+            <v-layout row wrap>
+            <v-flex
+             v-for="group in groups"
+             xs4
+            >
+                <group-card :group="group"></group-card>
+            <v-flex>
+            <v-layout>
+        </v-container>
+        <v-flex>
+    <v-layout>
+       
+    </div>
+    `,
+    data: function() {
+        return {
+            groups: [],
+            page: 1
+        }
+    },
+    methods: {
+        getGroups: async function() {
+            try {
+                let data = await sendRequest(`{groups(page: ${this.page}){name, description}}`, "groups");
+                console.log(data);
+                this.groups = data.groups;
+            }
+            catch (err) {
+                app.error = true;
+                throw err;
+            }
+        }
+    },
+    created: function() {
+        this.getGroups();
+    }
+
+}
 const LoginComponent = {
     data: function() {
         return {
@@ -104,19 +162,17 @@ const LoginComponent = {
                 let data = await sendRequest(`{login(email: "${this.email}", password: "${this.password}") {token}}`);
 
                 console.log(data);
-                let tk = data.login.token;
+
+                let tk = data.login.token
                 if (tk != undefined || tk != "") {
-                    console.log(tk)
                     app.token = tk;
                     app.turnOnRoutes();
                     router.replace('/main')
                 }
-                else {
-                    this.loading = false;
-                    console.warn("Wrong login");
-                }
             }
             catch (err) {
+                this.loading = false;
+                app.error = true;
                 console.error(err);
             }
         }
@@ -160,7 +216,7 @@ const UserProfile = {
             Email: {{user.local.email}}
         </li>
         </ul>
-        <v-switch v-model="allowOfflineUse"  v-on:change="setOfflineUsage">
+        <v-switch v-model="allowOfflineUse"  v-on:change="setOfflineUsage" v-if="!isOffline">
             <div slot="label">
             Offline Usage
             </div>
@@ -174,6 +230,9 @@ const UserProfile = {
     computed: {
         allowOfflineUse: () => {
             return app.allowOfflineUse;
+        },
+        isOffline: () => {
+            return app.isOffline;
         }
     },
     methods: {
@@ -184,18 +243,8 @@ const UserProfile = {
             app.$swal('Offline mode set to - ' + app.allowOfflineUse);
         },
         getUserData: async function() {
-            let profile = window.localStorage.getItem('profile');
-            console.log(profile)
-            if (!profile) {
-                let data = await sendRequest(`{myProfile{local{username,email}}}`)
-                console.log(data);
-                this.user = data.myProfile
-                console.log(this.user);
-            }
-            else {
-                this.user = profile;
-            }
-
+            let data = await sendRequest(`{myProfile{local{username,email}}}`, "profile")
+            this.user = data.myProfile
         }
     },
     created: function() {
@@ -203,7 +252,96 @@ const UserProfile = {
     }
 
 }
+const CreateGroup = {
+    data: function() {
+        return {
+            name: "",
+            description: "",
+            isPrivate: false,
+            rules: {
+                required: value => !!value || 'Required.',
+                counter: value => value.length <= 20 || 'Max 20 characters'
+            }
+        }
+    },
+    template: `
+    <div>
+    <div class="text-xs-center" v-if="loading">
+        <v-progress-circular
+          :size="50"
+          color="primary"
+          indeterminate
+        ></v-progress-circular>
+        </div>
+      <v-form v-else>
+        <v-container fluid>
+          <v-layout>
+            <v-flex
+              xs12
+              md4
+            >
+            
+            <v-flex xs12 sm6>
+              <v-text-field
+                v-model="name"
+                :rules="[rules.required, rules.counter]"
+                label="Name"
+                hint="This is your groups name be creative!"
+                counter
+                maxlength="20"
+              ></v-text-field>
+            </v-flex>
+    
+          <v-flex xs6>
+            <v-textarea
+              name="description"
+              :rules="[rules.required]"
+              label="Description"
+              v-model="description"
+              hint="Write a short description of what your group is about"
+            ></v-textarea>
+    
+            
+            <v-checkbox v-model="isPrivate">
+                <div slot="label">
+                    Is your group private?
+                </div>
+            </v-checkbox>
+            
+            <v-btn v-on:click='createGroup' primary large block>Submit</v-btn>
 
+            </v-flex>
+          </v-layout>
+        </v-container>
+      </v-form>
+    </div>
+`,
+    method: {
+        createGroup: async function() {
+
+            this.loading = true;
+
+            try {
+                // console.log(this.email)
+                // console.log(this.password)
+                // login(email: String!, password: String!): AuthData!
+                let data = await sendRequest(`mutation{}`);
+
+
+                console.log(data);
+
+
+            }
+            catch (err) {
+                this.loading = false;
+                app.error = true;
+                console.error(err);
+            }
+        }
+
+
+    }
+}
 // 2. Define some routes
 // Each route should map to a component. The "component" can
 // either be an actual component constructor created via
@@ -218,7 +356,8 @@ const routes = [
     { name: 'note', path: '/notes/:id', component: IndividualNote, visible: false, fixed: true },
     { name: 'find Group', path: '/findGroup', component: FindGroupComponent, visible: false },
     { name: 'find Session', path: '/session', component: FindSessionComponent, visible: false },
-    { name: 'profile', path: '/profile', component: UserProfile, visible: false, offline: true }
+    { name: 'profile', path: '/profile', component: UserProfile, visible: false, offline: true },
+    { name: 'create a group', path: '/createGroup', component: CreateGroup, visible: false, offline: false, fixed: true }
 ]
 
 // 3. Create the router instance and pass the `routes` option
@@ -240,7 +379,11 @@ const app = new Vue({
         groups: [],
         myGroups: [],
         allowOfflineUse: false,
-        isOffline: false
+        isOffline: false,
+        success: false,
+        info: false,
+        error: false,
+        warning: false
     },
     methods: {
         turnOnRoutes: function() {
@@ -327,6 +470,9 @@ window.addEventListener('offline', function(e) {
         app.isOffline = true;
         app.offlineMode();
     }
+    else {
+        app.turnOffRoutes();
+    }
     app.notifyOffline();
     console.log('offline');
 });
@@ -346,12 +492,18 @@ window.addEventListener('online', function(e) {
     console.log('online');
 });
 
+const getOffline = async(dataType) => {
+    let dataString = window.localStorage.getItem(dataType);
+    let data = JSON.parse(dataString);
+    return data;
+}
 
-const sendRequest = async(query) => {
+const sendRequest = async(query, dataType) => {
     try {
         if (app.isOffline) {
             console.warn("Currently offline so will not send any changes");
-            return;
+            let data = await getOffline(dataType);
+            return data;
         }
         if (app.token == "" && app.$route.path != '/login') {
             console.warn("Not logged in")
@@ -365,10 +517,10 @@ const sendRequest = async(query) => {
             }
         });
 
-        console.log(response);
+
         let data = response.data.data;
-        if (app.allowOfflineUse == true) {
-            SaveDataOffline(data);
+        if (app.allowOfflineUse) {
+            SaveDataOffline(data, dataType);
         }
 
         return data;
@@ -376,17 +528,25 @@ const sendRequest = async(query) => {
     }
     catch (err) {
         console.log(err);
+        throw err;
     }
 }
 
-const SaveDataOffline = async function(data) {
+const SaveDataOffline = async function(data, dataType) {
 
+    //Not allowed to use offline therefor no point saving data for offline use
     if (!app.allowOfflineUse)
         return;
 
-    console.log(data)
+    switch (dataType) {
+        case "profile":
+            // code block
+            window.localStorage.setItem(dataType, JSON.stringify(data));
+            break;
+        default:
+            // code block
+            window.localStorage.setItem(dataType, JSON.stringify(data));
+            console.warn("Data saved using default method because data type not found")
+    }
 
-    window.localStorage.setItem('profile', data);
-
-    console.warn("not implemented properly");
 }

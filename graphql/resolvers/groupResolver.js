@@ -6,9 +6,12 @@ var { transformGroup } = require("../helpers/index")
 
 
 module.exports = {
-    groups: async() => {
+    groups: async(args, req) => {
         try {
-            let groups = await Group.find();
+            // if (!req.isAuth) {
+            //     throw new Error("Log in")
+            // }
+            let groups = await Group.find().skip(10*(args.page -1)).sort({'date': -1}).limit(10);
             return groups.map(group => transformGroup(group))
         }
         catch (err) {
@@ -17,9 +20,9 @@ module.exports = {
     },
     createGroup: async(args, req) => {
         try {
-            // if (!req.isAuh) {
-            //     throw new Error("Log in")
-            // }
+            if (!req.isAuh) {
+                throw new Error("Log in")
+            }
             let group = new Group({
                 name: args.groupInput.name,
                 //Change this to req.userId later
@@ -37,6 +40,9 @@ module.exports = {
     },
     findGroup: async(args, req) => {
         try {
+            if (!req.isAuh) {
+                throw new Error("Log in")
+            }
             let group = await Group.findById(args.id);
             return transformGroup(group);
         }
