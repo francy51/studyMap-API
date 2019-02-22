@@ -66,7 +66,7 @@ module.exports = buildSchema(`
         
         input GroupInput {
             name: String!
-            creatorId: String!
+            description: String!
             isPrivate: Boolean!
         }
         
@@ -109,6 +109,7 @@ module.exports = buildSchema(`
         
         type rootQuery {
             groups(page: Int!): [Group!]!
+            myGroups: [Group!]!
             login(email: String!, password: String!): AuthData!
             findNotes(id: String!): Notes!
             findGroup(id: String!): Group!

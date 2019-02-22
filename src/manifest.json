@@ -1,12 +1,10 @@
 {
+  "name": "studymap",
   "short_name": "SM",
-  "name": "Study Maps",
-  "icons": [
-
-  ],
-  "start_url": "",
-  "background_color": "#3367D6",
-  "display": "standalone",
+  "theme_color": "#2196f3",
+  "background_color": "#2196f3",
+  "display": "browser",
+  "orientation": "portrait",
   "scope": "/",
-  "theme_color": "#3367D6"
+  "start_url": "/app.html"
 }

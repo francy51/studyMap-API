@@ -8,10 +8,28 @@ var { transformGroup } = require("../helpers/index")
 module.exports = {
     groups: async(args, req) => {
         try {
-            // if (!req.isAuth) {
-            //     throw new Error("Log in")
-            // }
-            let groups = await Group.find().skip(10*(args.page -1)).sort({'date': -1}).limit(10);
+            if (!req.isAuth) {
+                throw new Error("Log in")
+            }
+            //Need to make it so that if a group is private but you are part of the people in the group you can see it
+            let groups = await Group.find({
+                $or: [{ isPrivate: false }, { creator: req.userId }]
+            }).skip(10 * (args.page - 1)).sort({ 'date': -1 }).limit(10);
+            return groups.map(group => transformGroup(group))
+        }
+        catch (err) {
+            throw err
+        }
+    },
+    myGroups: async(args, req) => {
+        try {
+            if (!req.isAuth) {
+                throw new Error("Log in")
+            }
+            //Need to make it so that if a group is private but you are part of the people in the group you can see it
+            let groups = await Group.find({
+                creator: req.userId
+            }).skip(10 * (args.page - 1)).sort({ 'date': -1 }).limit(10);
             return groups.map(group => transformGroup(group))
         }
         catch (err) {
@@ -20,13 +38,14 @@ module.exports = {
     },
     createGroup: async(args, req) => {
         try {
-            if (!req.isAuh) {
+            if (!req.isAuth) {
                 throw new Error("Log in")
             }
             let group = new Group({
                 name: args.groupInput.name,
+                description: args.groupInput.description,
                 //Change this to req.userId later
-                creator: args.groupInput.creatorId,
+                creator: req.userId,
                 creationDate: new Date(),
                 isPrivate: args.groupInput.isPrivate,
                 isClosed: false

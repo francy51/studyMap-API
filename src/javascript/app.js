@@ -14,7 +14,7 @@ Vue.component('current-card', {
                 <h3 class="headline mb-0">Your groups</h3>
                 <h5  v-if="group"> {{group.name}} </h5>
                 <div v-else>
-                <h5> No group currently active </h5>
+                <h5> You are currently in no groups </h5>
 
                 </div>
               </div>
@@ -26,14 +26,18 @@ Vue.component('current-card', {
                         Create a group
                     </v-btn>
                 </router-link>
-          
-              <v-btn flat color="orange">Explore</v-btn>
+                <router-link to="/findGroup">
+                  <v-btn flat color="orange">Explore</v-btn>
+                </router-link>
             </v-card-actions>
           </v-card>
     </v-flex>
     </template>
     </div>
-`
+`,
+    created: function() {
+        app.loadMyGroups();
+    }
 })
 
 Vue.component('group-card', {
@@ -253,17 +257,6 @@ const UserProfile = {
 
 }
 const CreateGroup = {
-    data: function() {
-        return {
-            name: "",
-            description: "",
-            isPrivate: false,
-            rules: {
-                required: value => !!value || 'Required.',
-                counter: value => value.length <= 20 || 'Max 20 characters'
-            }
-        }
-    },
     template: `
     <div>
     <div class="text-xs-center" v-if="loading">
@@ -300,6 +293,7 @@ const CreateGroup = {
               v-model="description"
               hint="Write a short description of what your group is about"
             ></v-textarea>
+            </v-flex>
     
             
             <v-checkbox v-model="isPrivate">
@@ -316,21 +310,32 @@ const CreateGroup = {
       </v-form>
     </div>
 `,
-    method: {
+    data: function() {
+        return {
+            loading: false,
+            name: "",
+            description: "",
+            isPrivate: false,
+            rules: {
+                required: value => !!value || 'Required.',
+                counter: value => value.length <= 20 || 'Max 20 characters'
+            }
+        }
+    },
+
+    methods: {
         createGroup: async function() {
-
-            this.loading = true;
-
             try {
+                this.loading = true;
                 // console.log(this.email)
                 // console.log(this.password)
                 // login(email: String!, password: String!): AuthData!
-                let data = await sendRequest(`mutation{}`);
+                let data = await sendRequest(`mutation{createGroup(groupInput:{isPrivate:${this.isPrivate},name:"${this.name}",description:"${this.description}"}){name,description,creationDate,creator{local{username}}}}`);
 
 
                 console.log(data);
-
-
+                //Change this so that it redirects to the actual group 
+                router.replace('/findGroup');
             }
             catch (err) {
                 this.loading = false;
@@ -338,8 +343,6 @@ const CreateGroup = {
                 console.error(err);
             }
         }
-
-
     }
 }
 // 2. Define some routes
@@ -420,6 +423,10 @@ const app = new Vue({
         },
         notifyBackOnline: function() {
             this.$swal("You are back online!")
+        },
+        loadMyGroups: async function() {
+            let data = await sendRequest(`{myGroups{name}}`, "myGroups");
+            this.myGroups = data.myGroups;
         }
 
     },
@@ -432,7 +439,6 @@ const app = new Vue({
         else {
             this.turnOnRoutes();
         }
-
 
     }
 }).$mount('#app')
@@ -509,6 +515,9 @@ const sendRequest = async(query, dataType) => {
             console.warn("Not logged in")
             return;
         }
+        // console.log("-----------------This is the query-------------------")
+        // console.log("-----------------------------------------------------")
+        // console.log(query)
         //Remove this later
         let response = await axios.post('/api', { query }, {
             headers: {
@@ -533,20 +542,16 @@ const sendRequest = async(query, dataType) => {
 }
 
 const SaveDataOffline = async function(data, dataType) {
-
     //Not allowed to use offline therefor no point saving data for offline use
     if (!app.allowOfflineUse)
         return;
 
     switch (dataType) {
-        case "profile":
-            // code block
-            window.localStorage.setItem(dataType, JSON.stringify(data));
-            break;
         default:
             // code block
             window.localStorage.setItem(dataType, JSON.stringify(data));
             console.warn("Data saved using default method because data type not found")
+            break;
     }
 
 }
