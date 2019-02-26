@@ -3,7 +3,7 @@ var { buildSchema } = require("graphql")
 module.exports = buildSchema(`
     
         type Group {
-            _id: ID!
+            id: ID!
             name: String!
             description: String!
             creator: User!

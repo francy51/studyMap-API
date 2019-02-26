@@ -59,11 +59,17 @@ Vue.component('group-card', {
             <v-divider light></v-divider>
     
             <v-card-actions>
-              <v-btn flat color="orange">Find out more</v-btn>
+                <router-link v-bind:to="path">
+                    <v-btn flat color="orange">Find out more</v-btn>
+                </router-link>
             </v-card-actions>
           </v-card>
-
-    `
+    `,
+    computed: {
+        path: function() {
+            return '/groups/' + this.group.id;
+        }
+    }
 })
 
 
@@ -100,7 +106,7 @@ const FindGroupComponent = {
     methods: {
         getGroups: async function() {
             try {
-                let data = await sendRequest(`{groups(page: ${this.page}){name, description}}`, "groups");
+                let data = await sendRequest(`{groups(page: ${this.page}){id,name, description}}`, "groups");
                 console.log(data);
                 this.groups = data.groups;
             }
@@ -204,7 +210,22 @@ const MainComponent = {
 
 </div>`
 }
-const IndividualGroup = { template: `<h1>Individual group component</h1>` }
+const IndividualGroup = {
+    template: `<div>
+        <h1>Individual group component</h1>
+    </div>`,
+    date: function() {
+        return {
+            group: {}
+        }
+    },
+    methods: {
+        getGroup: async function() {
+            let data = await sendRequest(`{findGroup(id:"${this.$route.params.id}"){creator,name,description,id,isPrivate,creationDate}}`, "group")
+            console.log(data);
+        }
+    }
+}
 const IndividualUser = { template: `<h1>Individual user component</h1>` }
 const NotesMenuComponent = { template: `<h1>Notes menu</h1>` }
 const IndividualNote = { template: `<h1>Individual note</h1>` }
@@ -247,7 +268,7 @@ const UserProfile = {
             app.$swal('Offline mode set to - ' + app.allowOfflineUse);
         },
         getUserData: async function() {
-            let data = await sendRequest(`{myProfile{local{username,email}}}`, "profile")
+            let data = await sendRequest(`{myProfile{local{id,username,email}}}`, "profile")
             this.user = data.myProfile
         }
     },
@@ -353,7 +374,7 @@ const CreateGroup = {
 const routes = [
     { name: 'home', path: '/main', component: MainComponent, visible: false, offline: true },
     { name: 'login', path: '/login', component: LoginComponent, visible: true },
-    { name: 'group', path: '/group/:id', component: IndividualGroup, visible: false, fixed: true },
+    { name: 'group', path: '/groups/:id', component: IndividualGroup, visible: false, fixed: true },
     { name: 'user', path: '/user/:id', component: IndividualUser, visible: false, fixed: true },
     { name: 'notes', path: '/notes', component: NotesMenuComponent, visible: false, offline: true },
     { name: 'note', path: '/notes/:id', component: IndividualNote, visible: false, fixed: true },
@@ -425,7 +446,7 @@ const app = new Vue({
             this.$swal("You are back online!")
         },
         loadMyGroups: async function() {
-            let data = await sendRequest(`{myGroups{name}}`, "myGroups");
+            let data = await sendRequest(`{myGroups{id,name,description}}`, "myGroups");
             this.myGroups = data.myGroups;
         }
 
@@ -542,7 +563,6 @@ const sendRequest = async(query, dataType) => {
 }
 
 const SaveDataOffline = async function(data, dataType) {
-
     //Not allowed to use offline therefor no point saving data for offline use
     if (!app.allowOfflineUse)
         return;
@@ -551,8 +571,8 @@ const SaveDataOffline = async function(data, dataType) {
         default:
             // code block
             window.localStorage.setItem(dataType, JSON.stringify(data));
-            console.warn("Data saved using default method because data type not found")
-            break;
+        console.warn("Data saved using default method because data type not found")
+        break;
     }
 
 }

@@ -27,7 +27,7 @@ const users = async userIds => {
 const transformUser = (user) => {
     return {
         ...user._doc,
-        _id: user.id,
+        id: user.id,
         friends: users.bind(this, user.friends),
         local: {
             username: user.local.username,
@@ -62,7 +62,7 @@ const singleGroup = async groupId => {
 const transformGroup = (group) => {
     return {
         ...group._doc,
-        _id: group.id,
+        id: group.id,
         creator: singleUser.bind(this, group.creator),
         people: users.bind(this, group.people)
     }
@@ -71,7 +71,7 @@ const transformGroup = (group) => {
 const transformSession = (session) => {
     return {
         ...session._doc,
-        _id: session.id,
+        id: session.id,
         creator: singleUser.bind(this, session.creator),
         atendee: users.bind(this, session.atendee),
         parentGroup: singleGroup.bind(this, session.parentGroup)

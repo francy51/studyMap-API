@@ -8,13 +8,13 @@ var { transformGroup } = require("../helpers/index")
 module.exports = {
     groups: async(args, req) => {
         try {
-            if (!req.isAuth) {
-                throw new Error("Log in")
-            }
+            // if (!req.isAuth) {
+            //     throw new Error("Log in")
+            // }
             //Need to make it so that if a group is private but you are part of the people in the group you can see it
             let groups = await Group.find({
                 $or: [{ isPrivate: false }, { creator: req.userId }]
-            }).skip(10 * (args.page - 1)).sort({ 'date': -1 }).limit(10);
+            }).skip(10 * (args.page - 1)).limit(10);
             return groups.map(group => transformGroup(group))
         }
         catch (err) {
