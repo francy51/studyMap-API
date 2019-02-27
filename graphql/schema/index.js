@@ -60,7 +60,7 @@ module.exports = buildSchema(`
         }
         
         type User {
-            _id: ID!
+            id: ID!
             local: LocalUserData!
         }
         

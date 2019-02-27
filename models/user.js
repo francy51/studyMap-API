@@ -19,7 +19,10 @@ var userSchema = Schema({
     friends: [{
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }]
+    }],
+    description: {
+        type: String
+    }
 });
 
 module.exports = mongoose.model('User', userSchema);

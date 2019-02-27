@@ -2,6 +2,29 @@
 // and then call `Vue.use(VueRouter)`.
 
 // 1. Define route components.
+Vue.component('user-tab',{
+    props: ['user'],
+    template: `
+          <v-list-tile
+            :key="user.id"
+            avatar
+            @click=""
+          >
+            <v-list-tile-avatar>
+                <img :src="https://www.google.com.hk/url?sa=i&source=images&cd=&ved=2ahUKEwjY0Njw69rgAhWZHHAKHZm0CEwQjRx6BAgBEAU&url=https%3A%2F%2Fwww.vectorstock.com%2Froyalty-free-vector%2Fmale-face-avatar-logo-template-pictogram-vector-11333827&psig=AOvVaw2HkcWdFZ_kToiaOMInLlFN&ust=1551320106694512">
+            </v-list-tile-avatar>
+
+            <v-list-tile-content>
+              <v-list-tile-title v-html="user.name"></v-list-tile-title>
+            </v-list-tile-content>
+
+            <v-list-tile-action>
+              <v-icon :color="item.active ? 'teal' : 'grey'">chat_bubble</v-icon>
+            </v-list-tile-action>
+          </v-list-tile>
+    `
+})
+
 Vue.component('current-card', {
     props: ['group'],
     template: `
@@ -82,7 +105,7 @@ const FindGroupComponent = {
         <h1>Find a group</h1>
         <v-layout>
     <v-flex xs12 sm6 offset-sm3>
-        <v-container  v-bind="md" fluid>
+        <v-container fluid>
             <v-layout row wrap>
             <v-flex
              v-for="group in groups"
@@ -212,18 +235,68 @@ const MainComponent = {
 }
 const IndividualGroup = {
     template: `<div>
-        <h1>Individual group component</h1>
+        <div>
+            <v-container>
+                <v-layout row>
+                    <v-flex>
+                    <v-img
+                          src="https://cdn.vuetifyjs.com/images/cards/desert.jpg"
+                          lazy-src="https://picsum.photos/10/6?image=10"
+                          aspect-ratio="1"
+                          class="grey lighten-2"
+                          alt="Group photo"
+                          max-height="240"
+                          max-width="320"
+                    ></v-img>
+                    </v-flex>
+                    <v-flex>
+                        <v-card>
+                        <v-card-text>
+                            <h1>{{group.name}}</h1>
+                            <h3>{{group.description}}</h3>                        
+                        
+                        <v-spacer></v-spacer>
+                         <v-expansion-panel>
+                            <v-expansion-panel-content>
+                              <div slot="header">Group Members</div>
+                              <v-card>
+                                <v-card-text>
+                                     <v-expansion-panel>
+                                        <v-expansion-panel-content>
+                                          <div slot="header">{{group.creator.local.username}}</div>
+                                          <v-card>
+                                            <v-card-text>This is the creator of the group</v-card-text>
+                                          </v-card>
+                                        </v-expansion-panel-content>
+                                     </v-expansion-panel>
+                                </v-card-text>
+                              </v-card>
+                            </v-expansion-panel-content>
+                         </v-expansion-panel>
+                        <v-spacer></v-spacer>
+                            <v-btn>Join</v-btn>
+                        </v-card-text>
+                        </v-card>
+                    </v-flex>
+                </v-layout>
+            </v-container>
+        </div>
     </div>`,
-    date: function() {
+    data: function() {
         return {
             group: {}
         }
     },
     methods: {
         getGroup: async function() {
-            let data = await sendRequest(`{findGroup(id:"${this.$route.params.id}"){creator,name,description,id,isPrivate,creationDate}}`, "group")
+            console.log(this.$route.params.id)
+            let data = await sendRequest(`{findGroup(id:"${this.$route.params.id}"){creator{id,local{username}},name,description,id,isPrivate,creationDate}}`, this.$route.params.id)
             console.log(data);
+            this.group = data.findGroup;
         }
+    },
+    created: function(){
+        this.getGroup();
     }
 }
 const IndividualUser = { template: `<h1>Individual user component</h1>` }
