@@ -68,5 +68,24 @@ module.exports = {
         catch (err) {
             throw err;
         }
+    },
+    joinGroup: async(args, req) => {
+        try {
+            if (!req.isAuth) {
+                throw new Error("Log in")
+            }
+            let group = await Group.findById(args.id);
+            if(group.people.includes(req.userId)){
+                throw new Error("You are already in this group")
+            }
+            group.people.push(req.userId)
+            
+            group = await group.save();
+            
+            return transformGroup(group);
+        }
+        catch (err) {
+            throw err;
+        }
     }
 }

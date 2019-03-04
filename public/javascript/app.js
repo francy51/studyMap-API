@@ -274,7 +274,7 @@ const IndividualGroup = {
                             </v-expansion-panel-content>
                          </v-expansion-panel>
                         <v-spacer></v-spacer>
-                            <v-btn>Join</v-btn>
+                            <v-btn v-on:click='joinGroup' large>Join</v-btn>
                         </v-card-text>
                         </v-card>
                     </v-flex>
@@ -290,9 +290,14 @@ const IndividualGroup = {
     methods: {
         getGroup: async function() {
             console.log(this.$route.params.id)
-            let data = await sendRequest(`{findGroup(id:"${this.$route.params.id}"){creator{id,local{username}},name,description,id,isPrivate,creationDate}}`, this.$route.params.id)
+            let data = await sendRequest(`{findGroup(id:"${this.$route.params.id}"){creator{id,local{username}},name,description,id,isPrivate,creationDate,people{id,local{username}}}}`, this.$route.params.id)
             console.log(data);
             this.group = data.findGroup;
+        },
+        joinGroup: async function(){
+            let data = await sendRequest(`mutation{joinGroup(id:"${this.$route.params.id}"){creator{id,local{username}},name,description,id,isPrivate,creationDate,people{id,local{username}}}}`,this.$route.params.id)
+            console.log(data);
+            this.group = data.joinGroup;
         }
     },
     created: function(){

@@ -10,6 +10,7 @@ module.exports = buildSchema(`
             creationDate: String!
             isPrivate: Boolean!
             isClosed: Boolean!
+            people: [User!]!
         }
         
         type LocalUserData {
@@ -124,6 +125,7 @@ module.exports = buildSchema(`
             createUser(userInput: UserInput): User
             createSessions(sessionInput: SessionInput): Session!
             createNotes(notesInput: NotesInput): Notes!
+            joinGroup(id:String!):Group! 
         }
         
         schema{

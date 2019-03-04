@@ -33,10 +33,7 @@ var groupSchema = new Schema({
         required: true
     },
     sessions: [{ type: Schema.Types.ObjectId, ref: 'Session' }],
-    people: [{
-        //Add reference parameter when user data is found
-        _personId: { type: Schema.Types.ObjectId, ref: 'User' }
-    }],
+    people: [{type: Schema.Types.ObjectId, ref: 'User'}],
     notes: [{
         type: Schema.Types.ObjectId,
         ref: 'Notes'
